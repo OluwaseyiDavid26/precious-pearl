@@ -156,6 +156,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { logout } from "./login/action";
+import { signup } from "../actions/auth";
 
 type Step = "auth" | "otp";
 type Mode = "login" | "signup";

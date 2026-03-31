@@ -124,17 +124,6 @@ export default function WhoWeAreSection() {
                 </span>
               </Link>
             </div>
-
-            {/* Est. marker */}
-            <p
-              className="mt-8 text-white/20 text-xs tracking-widest uppercase"
-              style={{
-                opacity: animate ? 1 : 0,
-                transition: "opacity 0.6s ease 0.4s",
-              }}
-            >
-              Established 2020 &mdash; Ibadan, Nigeria
-            </p>
           </div>
 
           {/* ── Right column ── */}
@@ -166,32 +155,6 @@ export default function WhoWeAreSection() {
                 </div>
               </div>
             ))}
-
-            {/* Stats row */}
-            <div
-              className="mt-10 grid grid-cols-3 gap-6"
-              style={{
-                opacity: animate ? 1 : 0,
-                transform: animate ? "translateY(0)" : "translateY(20px)",
-                transition:
-                  "opacity 0.6s ease 0.55s, transform 0.6s ease 0.55s",
-              }}
-            >
-              {[
-                { value: "500+", label: "Children Supported" },
-                { value: "1,000+", label: "Supplies Distributed" },
-                { value: "4", label: "Active Programmes" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="text-white text-2xl font-bold tracking-tight">
-                    {stat.value}
-                  </p>
-                  <p className="text-white/35 text-xs mt-1 leading-snug">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
