@@ -311,7 +311,8 @@
 "use client";
 
 import { useState } from "react";
-import { login, signup, verifyOtp } from "../actions/auth";
+// import { login, signup, verifyOtp } from "../actions/auth";
+import { login, signup } from "./login/action";
 
 type Step = "auth" | "otp";
 type Mode = "login" | "signup";
