@@ -216,17 +216,17 @@ export default function WhatWeDoSection() {
         </div>
 
         {/* Bottom strip: quick stats + donate CTA */}
-        <div
+        {/* <div
           className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
           style={{
             opacity: visible ? 1 : 0,
             transition: "opacity 0.7s ease 0.65s",
           }}
         >
-          {/* <p className="text-white/40 text-[12.5px]">
+          <p className="text-white/40 text-[12.5px]">
             500+ children supported · 1,000+ supplies distributed · 50+
             communities reached
-          </p> */}
+          </p>
           <Link
             href="/donate"
             className="inline-flex items-center gap-2 bg-[#F5C400] text-[#0D1B5E] text-[11px] font-bold tracking-[0.15em] uppercase px-6 py-[11px] rounded-full hover:bg-[#e6b800] transition-colors duration-200 group"
@@ -236,7 +236,7 @@ export default function WhatWeDoSection() {
               →
             </span>
           </Link>
-        </div>
+        </div> */}
       </div>
     </section>
   );
