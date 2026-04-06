@@ -38,6 +38,7 @@ export default function ContactPage() {
 
   return (
     <main
+      id="contact"
       ref={pageRef}
       className="min-h-screen bg-[#0D1B5E] relative overflow-hidden flex items-center"
       style={{ fontFamily: "'DM Sans', sans-serif" }}

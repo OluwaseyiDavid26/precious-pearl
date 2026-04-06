@@ -393,7 +393,7 @@ export default function ProgramsPage() {
                   </span>
                 </Link>
                 <Link
-                  href="/contact"
+                  href="/#contact"
                   className="inline-flex items-center gap-2 border border-white/20 text-white/70 text-[11.5px] font-bold tracking-[0.14em] uppercase px-7 py-[14px] rounded-full hover:border-white/50 hover:text-white transition-colors duration-200 group"
                 >
                   Get Involved

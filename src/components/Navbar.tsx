@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Programs", href: "/programs" },
-  { label: "Events", href: "/events" },
+  { label: "Events", href: "/#events" },
   { label: "Contact", href: "/#contact" },
 ];
 
@@ -16,6 +16,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -30,15 +31,22 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
-  const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  function handleContactClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    setIsOpen(false);
     if (pathname === "/") {
-      e.preventDefault();
-      setIsOpen(false);
       document
         .getElementById("contact")
         ?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      router.push("/#contact");
+      setTimeout(() => {
+        document
+          .getElementById("contact")
+          ?.scrollIntoView({ behavior: "smooth" });
+      }, 500);
     }
-  };
+  }
 
   return (
     <>
@@ -56,7 +64,7 @@ export default function Navbar() {
       >
         <div className="max-w-[1200px] mx-auto px-6 sm:px-10">
           <div className="flex items-center justify-between h-[72px]">
-            {/* ── Logo ── */}
+            {/* Logo */}
             <Link
               href="/"
               className="flex items-center gap-[10px] flex-shrink-0"
@@ -75,7 +83,6 @@ export default function Navbar() {
                   PP
                 </span>
               </div>
-
               <div className="flex flex-col gap-[2px]">
                 <span
                   className="font-bold text-[17px] leading-none tracking-[0.01em] text-white"
@@ -92,20 +99,17 @@ export default function Navbar() {
               </div>
             </Link>
 
-            {/* ── Desktop Nav ── */}
+            {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center gap-[2px]">
               {navLinks.map((link) => {
                 const isContact = link.href === "/#contact";
                 const isActive = isContact ? false : pathname === link.href;
-
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={isContact ? handleContactClick : undefined}
-                    className={`relative text-[11px] font-semibold tracking-[0.1em] uppercase px-[13px] py-[8px] transition-all duration-200 ${
-                      isActive ? "text-white" : "text-white/70 hover:text-white"
-                    }`}
+                    className={`relative text-[11px] font-semibold tracking-[0.1em] uppercase px-[13px] py-[8px] transition-all duration-200 ${isActive ? "text-white" : "text-white/70 hover:text-white"}`}
                     style={{ fontFamily: "'Barlow', sans-serif" }}
                   >
                     {link.label}
@@ -117,7 +121,7 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* ── Donate CTA ── */}
+            {/* Donate CTA */}
             <div className="hidden lg:flex items-center">
               <Link
                 href="/donate"
@@ -128,42 +132,33 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* ── Mobile Hamburger ── */}
+            {/* Hamburger */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden flex flex-col gap-[5px] p-2"
               aria-label="Toggle menu"
             >
               <span
-                className={`block w-6 h-[1.5px] bg-white transition-all duration-300 ${
-                  isOpen ? "rotate-45 translate-y-[6.5px]" : ""
-                }`}
+                className={`block w-6 h-[1.5px] bg-white transition-all duration-300 ${isOpen ? "rotate-45 translate-y-[6.5px]" : ""}`}
               />
               <span
-                className={`block h-[1.5px] bg-white transition-all duration-300 ${
-                  isOpen ? "w-0 opacity-0" : "w-4"
-                }`}
+                className={`block h-[1.5px] bg-white transition-all duration-300 ${isOpen ? "w-0 opacity-0" : "w-4"}`}
               />
               <span
-                className={`block w-6 h-[1.5px] bg-white transition-all duration-300 ${
-                  isOpen ? "-rotate-45 -translate-y-[6.5px]" : ""
-                }`}
+                className={`block w-6 h-[1.5px] bg-white transition-all duration-300 ${isOpen ? "-rotate-45 -translate-y-[6.5px]" : ""}`}
               />
             </button>
           </div>
         </div>
 
-        {/* ── Mobile Menu ── */}
+        {/* Mobile Menu */}
         <div
-          className={`lg:hidden overflow-hidden transition-all duration-300 ${
-            isOpen ? "max-h-[420px]" : "max-h-0"
-          }`}
+          className={`lg:hidden overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[420px]" : "max-h-0"}`}
         >
           <div className="px-6 py-5 flex flex-col border-t bg-[#0D1B5E]/95 backdrop-blur-md border-white/10">
             {navLinks.map((link) => {
               const isContact = link.href === "/#contact";
               const isActive = isContact ? false : pathname === link.href;
-
               return (
                 <Link
                   key={link.href}
@@ -171,18 +166,13 @@ export default function Navbar() {
                   onClick={
                     isContact ? handleContactClick : () => setIsOpen(false)
                   }
-                  className={`py-4 text-[11px] font-semibold tracking-[0.12em] uppercase border-b transition-colors duration-200 ${
-                    isActive
-                      ? "text-white border-white/10"
-                      : "text-white/70 hover:text-white border-white/08"
-                  }`}
+                  className={`py-4 text-[11px] font-semibold tracking-[0.12em] uppercase border-b transition-colors duration-200 ${isActive ? "text-white border-white/10" : "text-white/70 hover:text-white border-white/10"}`}
                   style={{ fontFamily: "'Barlow', sans-serif" }}
                 >
                   {link.label}
                 </Link>
               );
             })}
-
             <Link
               href="/donate"
               onClick={() => setIsOpen(false)}

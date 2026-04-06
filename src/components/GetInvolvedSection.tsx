@@ -72,7 +72,7 @@ const options = [
     description:
       "Are you a school, business, or community organisation? Let's work together to expand our reach and create lasting impact for children.",
     cta: "Become a Partner",
-    href: "/contact",
+    href: "/#contact",
     primary: false,
   },
 ];

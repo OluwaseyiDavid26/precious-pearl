@@ -145,7 +145,7 @@ export default function Footer() {
           {/* ── Right: Location + Phone ── */}
           <div className="text-center md:text-right">
             <p className="text-white/70 text-sm font-medium leading-relaxed">
-              Insert Location Here
+              Houston, Texas, USA
             </p>
             <p className="text-white text-sm font-bold mt-1 tabular-nums">
               +1 832 894 7736
