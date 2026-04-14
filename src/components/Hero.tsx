@@ -135,26 +135,24 @@ export default function Hero() {
     const elements = containerRef.current?.querySelectorAll(".hero-animate");
     if (!elements) return;
 
-    elements.forEach((el, i) => {
+    elements.forEach((el) => {
       const htmlEl = el as HTMLElement;
       htmlEl.style.opacity = "0";
-      htmlEl.style.transform = "translateX(-48px)";
-      htmlEl.style.transition = `opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.75s cubic-bezier(0.22, 1, 0.36, 1)`;
-      htmlEl.style.transitionDelay = `${0.1 + i * 0.12}s`;
+      htmlEl.style.transform = "translateX(-60px)";
     });
 
-    // Trigger after a short paint delay
     const raf = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        elements.forEach((el) => {
+        elements.forEach((el, i) => {
           const htmlEl = el as HTMLElement;
+          htmlEl.style.transition = `opacity 1.1s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + i * 0.18}s, transform 1.1s cubic-bezier(0.16, 1, 0.3, 1) ${0.15 + i * 0.18}s`;
           htmlEl.style.opacity = "1";
           htmlEl.style.transform = "translateX(0)";
         });
       });
     });
 
-    return () => cancelAnimationFrame(raf);
+    return () => {};
   }, []);
 
   const stats = [
