@@ -354,11 +354,43 @@ function useScrollReveal(threshold = 0.1) {
   return { ref, visible };
 }
 
-function slide(visible: boolean, delay: number) {
+/* ── Animation helpers ── */
+
+/** Slides in from the left */
+function fadeLeft(visible: boolean, delay: number): React.CSSProperties {
   return {
     opacity: visible ? 1 : 0,
     transform: visible ? "translateX(0)" : "translateX(-48px)",
-    transition: `opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s, transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) ${delay}s`,
+    transition: `opacity 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+  };
+}
+
+/** Fades up — used for the CTA so it feels distinct */
+function fadeUp(visible: boolean, delay: number): React.CSSProperties {
+  return {
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(28px)",
+    transition: `opacity 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.7s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+  };
+}
+
+/** Scales + fades up — used for cards so they feel "popped in" */
+function scaleIn(visible: boolean, delay: number): React.CSSProperties {
+  return {
+    opacity: visible ? 1 : 0,
+    transform: visible
+      ? "scale(1) translateY(0)"
+      : "scale(0.88) translateY(20px)",
+    transition: `opacity 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.6s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+  };
+}
+
+/** Grows the eyebrow bar from 0 width */
+function barGrow(visible: boolean, delay: number): React.CSSProperties {
+  return {
+    transformOrigin: "left",
+    transform: visible ? "scaleX(1)" : "scaleX(0)",
+    transition: `transform 0.5s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
   };
 }
 
@@ -371,7 +403,7 @@ export default function WhatWeDoSection() {
       className="relative bg-[#0D1B5E] py-24 px-6 overflow-hidden"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      {/* Decorative corner accents */}
+      {/* Decorative glows */}
       <div
         className="absolute top-0 left-0 w-72 h-72 pointer-events-none"
         style={{
@@ -387,19 +419,22 @@ export default function WhatWeDoSection() {
         }}
       />
 
-      {/* Subtle vertical rule on left edge */}
+      {/* Vertical rule */}
       <div className="absolute left-0 top-1/4 bottom-1/4 w-px bg-gradient-to-b from-transparent via-[#F5C400]/20 to-transparent" />
 
       <div className="max-w-5xl mx-auto relative">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.6fr] gap-16 lg:gap-20 items-start">
           {/* ── Left: heading + CTA ── */}
           <div className="lg:sticky lg:top-32">
-            {/* Eyebrow */}
+            {/* Eyebrow — bar grows in, then text slides */}
             <div
               className="flex items-center gap-3 mb-5"
-              style={slide(visible, 0.0)}
+              style={fadeLeft(visible, 0.0)}
             >
-              <div className="w-6 h-[2px] bg-[#F5C400]" />
+              <div
+                className="w-6 h-[2px] bg-[#F5C400]"
+                style={barGrow(visible, 0.05)}
+              />
               <span className="text-[#F5C400] text-[10px] font-bold tracking-[0.35em] uppercase">
                 What We Do
               </span>
@@ -409,7 +444,7 @@ export default function WhatWeDoSection() {
             <h2
               className="text-white text-3xl lg:text-[40px] font-bold leading-[1.1] tracking-tight mb-6"
               style={{
-                ...slide(visible, 0.1),
+                ...fadeLeft(visible, 0.12),
                 fontFamily: "'Fraunces', Georgia, serif",
               }}
             >
@@ -421,15 +456,15 @@ export default function WhatWeDoSection() {
             {/* Body */}
             <p
               className="text-white/60 text-[14.5px] leading-[1.85] mb-8"
-              style={slide(visible, 0.2)}
+              style={fadeLeft(visible, 0.22)}
             >
               From classroom supplies to one-on-one mentorship, every programme
               we run is designed to remove barriers and create real, lasting
               change in children's lives.
             </p>
 
-            {/* CTA */}
-            <div style={slide(visible, 0.3)}>
+            {/* CTA — fades up so it feels distinct from the left-slides */}
+            <div style={fadeUp(visible, 0.32)}>
               <Link
                 href="/programs"
                 className="inline-flex items-center gap-3 bg-white text-[#0D1B5E] text-[11.5px] font-bold tracking-[0.14em] uppercase px-7 py-[14px] rounded-full hover:bg-[#F5C400] transition-colors duration-200 group"
@@ -441,11 +476,11 @@ export default function WhatWeDoSection() {
               </Link>
             </div>
 
-            {/* Decorative number watermark */}
+            {/* Watermark number */}
             <div
               className="mt-12 text-[120px] font-bold leading-none select-none pointer-events-none hidden lg:block"
               style={{
-                ...slide(visible, 0.4),
+                ...fadeLeft(visible, 0.42),
                 color: "rgba(245,196,0,0.04)",
                 fontFamily: "'Fraunces', Georgia, serif",
                 letterSpacing: "-4px",
@@ -455,14 +490,15 @@ export default function WhatWeDoSection() {
             </div>
           </div>
 
-          {/* ── Right: highlight rows ── */}
+          {/* ── Right: cards ── */}
           <div className="space-y-3">
             {highlights.map((item, i) => (
               <div
                 key={item.id}
                 className="relative flex items-start gap-5 rounded-2xl px-6 py-5 border border-white/8 hover:border-[#F5C400]/40 transition-all duration-300 group cursor-default overflow-hidden"
                 style={{
-                  ...slide(visible, 0.15 + i * 0.12),
+                  /* Cards scale+fade in, staggered */
+                  ...scaleIn(visible, 0.18 + i * 0.12),
                   background: "rgba(255,255,255,0.04)",
                   backdropFilter: "blur(8px)",
                 }}
@@ -473,8 +509,17 @@ export default function WhatWeDoSection() {
                 {/* Left gold bar */}
                 <div className="absolute left-0 top-4 bottom-4 w-[3px] rounded-full bg-[#F5C400] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                {/* Icon bubble */}
-                <div className="w-11 h-11 rounded-xl bg-[#F5C400]/10 border border-[#F5C400]/20 flex items-center justify-center flex-shrink-0 text-[#F5C400] group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] transition-colors duration-300 relative z-10">
+                {/* Icon bubble — pulses once on entrance */}
+                <div
+                  className="w-11 h-11 rounded-xl bg-[#F5C400]/10 border border-[#F5C400]/20 flex items-center justify-center flex-shrink-0 text-[#F5C400] group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] transition-colors duration-300 relative z-10"
+                  style={
+                    visible
+                      ? {
+                          animation: `ppsi-pulse 0.55s cubic-bezier(0.22,1,0.36,1) ${0.28 + i * 0.12}s both`,
+                        }
+                      : undefined
+                  }
+                >
                   {item.icon}
                 </div>
 
@@ -488,7 +533,7 @@ export default function WhatWeDoSection() {
                   </p>
                 </div>
 
-                {/* Index number */}
+                {/* Index */}
                 <div className="self-center pl-4 text-[11px] font-bold tabular-nums text-white/15 group-hover:text-[#F5C400]/50 transition-colors duration-300 flex-shrink-0 relative z-10">
                   0{item.id}
                 </div>
@@ -497,6 +542,15 @@ export default function WhatWeDoSection() {
           </div>
         </div>
       </div>
+
+      {/* Keyframes injected once via a style tag */}
+      <style>{`
+        @keyframes ppsi-pulse {
+          0%   { box-shadow: 0 0 0 0 rgba(245,196,0,0.40); }
+          60%  { box-shadow: 0 0 0 10px rgba(245,196,0,0); }
+          100% { box-shadow: 0 0 0 0 rgba(245,196,0,0); }
+        }
+      `}</style>
     </section>
   );
 }

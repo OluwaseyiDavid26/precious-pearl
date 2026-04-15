@@ -585,11 +585,13 @@ const programs = [
   },
 ];
 
-// ── Scroll reveal hook ─────────────────────────────────────
-function useScrollReveal(threshold = 0.1) {
+// ── Generic scroll-reveal hook ─────────────────────────────
+function useInView(threshold = 0.1, rootMargin = "0px") {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -597,15 +599,53 @@ function useScrollReveal(threshold = 0.1) {
           observer.disconnect();
         }
       },
-      { threshold },
+      { threshold, rootMargin },
     );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold]);
+    const timer = setTimeout(() => observer.observe(el), 80);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [threshold, rootMargin]);
   return { ref, visible };
 }
 
-// ── Individual card reveal (each card gets its own observer) ──
+// ── ANIMATION 1: Hero — word-by-word drop-in ──────────────
+function WordReveal({
+  text,
+  visible,
+  baseDelay = 0,
+  className = "",
+  style = {},
+}: {
+  text: string;
+  visible: boolean;
+  baseDelay?: number;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const words = text.split(" ");
+  return (
+    <span className={className} style={{ display: "inline", ...style }}>
+      {words.map((word, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-block",
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(28px)",
+            transition: `opacity 0.55s ease ${baseDelay + i * 0.07}s,
+                         transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) ${baseDelay + i * 0.07}s`,
+          }}
+        >
+          {word}&nbsp;
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// ── ANIMATION 2: Cards — alternate left/right slide ────────
 function ProgramCard({
   program,
   index,
@@ -615,8 +655,11 @@ function ProgramCard({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const fromLeft = index % 2 === 0;
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -624,31 +667,34 @@ function ProgramCard({
           observer.disconnect();
         }
       },
-      { threshold: 0.1 },
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
     );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
+    const timer = setTimeout(() => observer.observe(el), 100);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, []);
 
   return (
     <div
       ref={ref}
-      className="group bg-white/[0.04] border border-white/10 rounded-3xl overflow-hidden hover:border-[#F5C400]/30 hover:bg-white/[0.07] transition-all duration-300 relative"
+      className="group bg-white/[0.04] border border-white/10 rounded-3xl overflow-hidden hover:border-[#F5C400]/30 hover:bg-white/[0.07] transition-colors duration-300 relative"
       style={{
         opacity: visible ? 1 : 0,
-        // Unroll: clip from left + slight translateX
-        clipPath: visible
-          ? "inset(0% 0% 0% 0% round 24px)"
-          : "inset(0% 100% 0% 0% round 24px)",
-        transform: visible ? "translateX(0)" : "translateX(-24px)",
-        transition: `opacity 0.5s ease ${index * 0.1}s,
-                     clip-path 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.1}s,
-                     transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.1}s,
-                     border-color 0.3s, background 0.3s`,
+        transform: visible
+          ? "translateX(0) scale(1)"
+          : `translateX(${fromLeft ? "-48px" : "48px"}) scale(0.97)`,
+        transition: `opacity 0.65s ease ${index * 0.08}s,
+                     transform 0.75s cubic-bezier(0.22, 1, 0.36, 1) ${index * 0.08}s`,
       }}
     >
-      {/* Left gold reveal bar — animates with the clip */}
-      <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-[#F5C400]/60 via-[#F5C400] to-[#F5C400]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      {/* Directional accent bar */}
+      {fromLeft ? (
+        <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-[#F5C400]/60 via-[#F5C400] to-[#F5C400]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      ) : (
+        <div className="absolute right-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-[#F5C400]/60 via-[#F5C400] to-[#F5C400]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px]">
         {/* Content */}
@@ -679,18 +725,14 @@ function ProgramCard({
 
         {/* Stats */}
         <div className="flex lg:flex-col justify-between gap-4 px-8 py-8 lg:px-8 lg:py-10 border-t lg:border-t-0 lg:border-l border-white/[0.07]">
-          {program.stats.map((s) => (
-            <div key={s.label}>
-              <p
-                className="text-[#F5C400] text-[30px] font-black leading-none mb-1"
-                style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-              >
-                {s.value}
-              </p>
-              <p className="text-white/35 text-[11px] uppercase tracking-[0.18em] font-medium">
-                {s.label}
-              </p>
-            </div>
+          {program.stats.map((s, si) => (
+            <AnimatedStat
+              key={s.label}
+              value={s.value}
+              label={s.label}
+              visible={visible}
+              delay={index * 0.08 + si * 0.15 + 0.3}
+            />
           ))}
         </div>
       </div>
@@ -698,18 +740,151 @@ function ProgramCard({
   );
 }
 
+// Stat counter pop-in
+function AnimatedStat({
+  value,
+  label,
+  visible,
+  delay,
+}: {
+  value: string;
+  label: string;
+  visible: boolean;
+  delay: number;
+}) {
+  return (
+    <div
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible
+          ? "translateY(0) scale(1)"
+          : "translateY(16px) scale(0.85)",
+        transition: `opacity 0.5s ease ${delay}s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`,
+      }}
+    >
+      <p
+        className="text-[#F5C400] text-[30px] font-black leading-none mb-1"
+        style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+      >
+        {value}
+      </p>
+      <p className="text-white/35 text-[11px] uppercase tracking-[0.18em] font-medium">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+// ── ANIMATION 3: CTA — scale-up reveal + staggered buttons ─
+function CTASection() {
+  const { ref, visible } = useInView(0.15, "0px");
+
+  return (
+    <section
+      ref={ref as React.RefObject<HTMLElement>}
+      className="py-20 px-6 border-t border-white/[0.06]"
+    >
+      <div className="max-w-5xl mx-auto">
+        <div
+          className="relative rounded-3xl overflow-hidden bg-white/[0.04] border border-white/10 px-10 py-14 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10 hover:border-[#F5C400]/25 transition-colors duration-300"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible
+              ? "scale(1) translateY(0)"
+              : "scale(0.94) translateY(32px)",
+            transition:
+              "opacity 0.7s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#F5C400]" />
+          <div
+            className="absolute right-10 top-1/2 -translate-y-1/2 text-[140px] font-black leading-none select-none pointer-events-none"
+            style={{
+              color: "rgba(245,196,0,0.03)",
+              fontFamily: "'Fraunces', Georgia, serif",
+            }}
+          >
+            PPSI
+          </div>
+
+          {/* Text block — slides up */}
+          <div
+            className="relative"
+            style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateX(0)" : "translateX(-24px)",
+              transition:
+                "opacity 0.7s ease 0.2s, transform 0.7s cubic-bezier(0.22,1,0.36,1) 0.2s",
+            }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-5 h-[2px] bg-[#F5C400]" />
+              <span className="text-[#F5C400] text-[10px] font-bold tracking-[0.35em] uppercase">
+                Make a Difference
+              </span>
+            </div>
+            <h2
+              className="text-white text-3xl lg:text-[38px] font-bold leading-[1.12] mb-3"
+              style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+            >
+              Every contribution
+              <br />
+              changes a child's story.
+            </h2>
+            <p className="text-white/45 text-[14px] max-w-md leading-[1.8]">
+              Whether you donate, volunteer, or simply share — you're part of
+              the movement building better futures.
+            </p>
+          </div>
+
+          {/* Buttons — spring bounce in with stagger */}
+          <div className="relative flex flex-col sm:flex-row gap-3 flex-shrink-0">
+            {[
+              {
+                href: "/donate",
+                label: "Donate Now",
+                primary: true,
+                delay: 0.45,
+              },
+              {
+                href: "/#contact",
+                label: "Get Involved",
+                primary: false,
+                delay: 0.58,
+              },
+            ].map(({ href, label, primary, delay }) => (
+              <Link
+                key={label}
+                href={href}
+                className={`inline-flex items-center gap-2 text-[11.5px] font-bold tracking-[0.14em] uppercase px-7 py-[14px] rounded-full transition-colors duration-200 group ${
+                  primary
+                    ? "bg-[#F5C400] text-[#0D1B5E] hover:bg-white"
+                    : "border border-white/20 text-white/70 hover:border-white/50 hover:text-white"
+                }`}
+                style={{
+                  opacity: visible ? 1 : 0,
+                  transform: visible
+                    ? "translateY(0) scale(1)"
+                    : "translateY(20px) scale(0.9)",
+                  transition: `opacity 0.5s ease ${delay}s, transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s`,
+                }}
+              >
+                {label}
+                <span className="group-hover:translate-x-1 transition-transform duration-200">
+                  <ArrowRight />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────
 export default function ProgramsPage() {
-  const { ref: heroRef, visible: heroVisible } = useScrollReveal(0.1);
-  const { ref: ctaRef, visible: ctaVisible } = useScrollReveal(0.15);
-
-  function slideLeft(delay = 0) {
-    return {
-      opacity: heroVisible ? 1 : 0,
-      transform: heroVisible ? "translateX(0)" : "translateX(-48px)",
-      transition: `opacity 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
-    };
-  }
+  const { ref: heroRef, visible: heroVisible } = useInView(0.05, "0px");
 
   return (
     <>
@@ -718,7 +893,7 @@ export default function ProgramsPage() {
         className="bg-[#0D1B5E] min-h-screen text-white"
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
-        {/* ── HERO: left slide ── */}
+        {/* ── HERO: word-by-word drop cascade ── */}
         <section
           ref={heroRef as React.RefObject<HTMLElement>}
           className="relative overflow-hidden py-28 px-6"
@@ -731,37 +906,65 @@ export default function ProgramsPage() {
                 "radial-gradient(ellipse at top left, rgba(245,196,0,0.07) 0%, transparent 60%)",
             }}
           />
+          {/* Decorative number — fades in slowly */}
           <div
             className="absolute right-0 bottom-0 text-[220px] font-black leading-none select-none pointer-events-none"
             style={{
               color: "rgba(245,196,0,0.03)",
               fontFamily: "'Fraunces', Georgia, serif",
+              opacity: heroVisible ? 1 : 0,
+              transform: heroVisible ? "translateX(0)" : "translateX(60px)",
+              transition: "opacity 1.2s ease 0.4s, transform 1.2s ease 0.4s",
             }}
           >
             05
           </div>
 
           <div className="max-w-5xl mx-auto relative">
-            <div className="flex items-center gap-3 mb-6" style={slideLeft(0)}>
+            {/* Eyebrow — slide + fade */}
+            <div
+              className="flex items-center gap-3 mb-6"
+              style={{
+                opacity: heroVisible ? 1 : 0,
+                transform: heroVisible ? "translateX(0)" : "translateX(-20px)",
+                transition:
+                  "opacity 0.6s ease 0.05s, transform 0.6s ease 0.05s",
+              }}
+            >
               <div className="w-6 h-[2px] bg-[#F5C400]" />
               <span className="text-[#F5C400] text-[10px] font-bold tracking-[0.35em] uppercase">
                 Our Programmes
               </span>
             </div>
+
+            {/* H1 — word-by-word drop */}
             <h1
               className="text-4xl lg:text-[56px] font-bold leading-[1.07] tracking-tight mb-6 max-w-2xl"
-              style={{
-                ...slideLeft(0.1),
-                fontFamily: "'Fraunces', Georgia, serif",
-              }}
+              style={{ fontFamily: "'Fraunces', Georgia, serif" }}
             >
-              Five Ways We
+              <WordReveal
+                text="Five Ways We"
+                visible={heroVisible}
+                baseDelay={0.12}
+              />
               <br />
-              <span className="text-[#F5C400]">Change Lives.</span>
+              <WordReveal
+                text="Change Lives."
+                visible={heroVisible}
+                baseDelay={0.38}
+                style={{ color: "#F5C400" }}
+              />
             </h1>
+
+            {/* Subtext — fade up as a block */}
             <p
               className="text-white/50 text-[15px] leading-[1.85] max-w-lg"
-              style={slideLeft(0.2)}
+              style={{
+                opacity: heroVisible ? 1 : 0,
+                transform: heroVisible ? "translateY(0)" : "translateY(20px)",
+                transition:
+                  "opacity 0.7s ease 0.75s, transform 0.7s ease 0.75s",
+              }}
             >
               Every programme is intentional, measurable, and designed to remove
               the barriers standing between a child and their potential.
@@ -769,7 +972,7 @@ export default function ProgramsPage() {
           </div>
         </section>
 
-        {/* ── PROGRAMME CARDS: unroll left-to-right ── */}
+        {/* ── PROGRAMME CARDS: alternating left/right ── */}
         <section className="py-20 px-6">
           <div className="max-w-5xl mx-auto space-y-5">
             {programs.map((p, i) => (
@@ -778,79 +981,8 @@ export default function ProgramsPage() {
           </div>
         </section>
 
-        {/* ── CTA BANNER: perspective-tilt snap ── */}
-        <section
-          ref={ctaRef as React.RefObject<HTMLElement>}
-          className="py-20 px-6 border-t border-white/[0.06]"
-        >
-          <div className="max-w-5xl mx-auto">
-            <div
-              className="relative rounded-3xl overflow-hidden bg-white/[0.04] border border-white/10 px-10 py-14 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10 hover:border-[#F5C400]/25 transition-colors duration-300"
-              style={{
-                opacity: ctaVisible ? 1 : 0,
-                transform: ctaVisible
-                  ? "perspective(800px) rotateX(0deg) translateY(0)"
-                  : "perspective(800px) rotateX(8deg) translateY(40px)",
-                transformOrigin: "bottom center",
-                transition:
-                  "opacity 0.7s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1)",
-              }}
-            >
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#F5C400]" />
-              <div
-                className="absolute right-10 top-1/2 -translate-y-1/2 text-[140px] font-black leading-none select-none pointer-events-none"
-                style={{
-                  color: "rgba(245,196,0,0.03)",
-                  fontFamily: "'Fraunces', Georgia, serif",
-                }}
-              >
-                PPSI
-              </div>
-
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-5 h-[2px] bg-[#F5C400]" />
-                  <span className="text-[#F5C400] text-[10px] font-bold tracking-[0.35em] uppercase">
-                    Make a Difference
-                  </span>
-                </div>
-                <h2
-                  className="text-white text-3xl lg:text-[38px] font-bold leading-[1.12] mb-3"
-                  style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-                >
-                  Every contribution
-                  <br />
-                  changes a child's story.
-                </h2>
-                <p className="text-white/45 text-[14px] max-w-md leading-[1.8]">
-                  Whether you donate, volunteer, or simply share — you're part
-                  of the movement building better futures.
-                </p>
-              </div>
-
-              <div className="relative flex flex-col sm:flex-row gap-3 flex-shrink-0">
-                <Link
-                  href="/donate"
-                  className="inline-flex items-center gap-2 bg-[#F5C400] text-[#0D1B5E] text-[11.5px] font-bold tracking-[0.14em] uppercase px-7 py-[14px] rounded-full hover:bg-white transition-colors duration-200 group"
-                >
-                  Donate Now
-                  <span className="group-hover:translate-x-1 transition-transform duration-200">
-                    <ArrowRight />
-                  </span>
-                </Link>
-                <Link
-                  href="/#contact"
-                  className="inline-flex items-center gap-2 border border-white/20 text-white/70 text-[11.5px] font-bold tracking-[0.14em] uppercase px-7 py-[14px] rounded-full hover:border-white/50 hover:text-white transition-colors duration-200 group"
-                >
-                  Get Involved
-                  <span className="group-hover:translate-x-1 transition-transform duration-200">
-                    <ArrowRight />
-                  </span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* ── CTA: scale-up + spring buttons ── */}
+        <CTASection />
       </main>
       <Footer />
     </>
