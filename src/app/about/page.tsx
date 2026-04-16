@@ -975,7 +975,7 @@ export default function AboutPage() {
             <div className="relative" style={slideLeft(storyVisible, 0)}>
               <div className="rounded-3xl overflow-hidden aspect-[4/3] relative">
                 <Image
-                  src="/0YHrM.jpg"
+                  src="/hero3.jpg"
                   alt="Precious Pearl"
                   fill
                   className="object-cover"
