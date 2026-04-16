@@ -1,39 +1,85 @@
 // "use client";
 
-// import { useEffect, useRef } from "react";
+// import { useEffect, useRef, useState } from "react";
 // import Link from "next/link";
 // import Image from "next/image";
 // import Navbar from "@/components/Navbar";
 // import Footer from "@/components/Footer";
 
-// function useReveal(ref: React.RefObject<HTMLElement | null>) {
+// // ── Shared scroll-reveal hook ──────────────────────────────
+// function useScrollReveal(threshold = 0.1) {
+//   const ref = useRef<HTMLElement>(null);
+//   const [visible, setVisible] = useState(false);
 //   useEffect(() => {
 //     const observer = new IntersectionObserver(
-//       (entries) => {
-//         entries.forEach((entry) => {
-//           if (entry.isIntersecting) {
-//             entry.target.querySelectorAll(".reveal").forEach((el, i) => {
-//               setTimeout(() => {
-//                 (el as HTMLElement).style.opacity = "1";
-//                 (el as HTMLElement).style.transform = "translateY(0)";
-//               }, i * 120);
-//             });
-//           }
-//         });
+//       ([entry]) => {
+//         if (entry.isIntersecting) {
+//           setVisible(true);
+//           observer.disconnect();
+//         }
 //       },
-//       { threshold: 0.1 },
+//       { threshold },
 //     );
 //     if (ref.current) observer.observe(ref.current);
 //     return () => observer.disconnect();
-//   }, [ref]);
+//   }, [threshold]);
+//   return { ref, visible };
 // }
 
-// const revealStyle: React.CSSProperties = {
-//   opacity: 0,
-//   transform: "translateY(32px)",
-//   transition: "all 0.65s cubic-bezier(0.22, 1, 0.36, 1)",
-// };
+// // ── Animation helpers ──────────────────────────────────────
+// function slideLeft(visible: boolean, delay = 0) {
+//   return {
+//     opacity: visible ? 1 : 0,
+//     transform: visible ? "translateX(0)" : "translateX(-56px)",
+//     transition: `opacity 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+//   };
+// }
+// function slideRight(visible: boolean, delay = 0) {
+//   return {
+//     opacity: visible ? 1 : 0,
+//     transform: visible ? "translateX(0)" : "translateX(56px)",
+//     transition: `opacity 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.75s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+//   };
+// }
+// function scaleUp(visible: boolean, delay = 0) {
+//   return {
+//     opacity: visible ? 1 : 0,
+//     transform: visible
+//       ? "scale(1) translateY(0)"
+//       : "scale(0.90) translateY(28px)",
+//     transition: `opacity 0.6s cubic-bezier(0.34,1.56,0.64,1) ${delay}s, transform 0.6s cubic-bezier(0.34,1.56,0.64,1) ${delay}s`,
+//   };
+// }
+// function fadeUp(visible: boolean, delay = 0) {
+//   return {
+//     opacity: visible ? 1 : 0,
+//     transform: visible ? "translateY(0)" : "translateY(24px)",
+//     transition: `opacity 0.65s ease ${delay}s, transform 0.65s ease ${delay}s`,
+//   };
+// }
+// function fanIn(visible: boolean, index: number) {
+//   const delay = 0.1 + index * 0.1;
+//   const angle = visible ? 0 : -6 + index * 2;
+//   return {
+//     opacity: visible ? 1 : 0,
+//     transform: visible
+//       ? "rotate(0deg) translateY(0)"
+//       : `rotate(${angle}deg) translateY(40px)`,
+//     transition: `opacity 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
+//   };
+// }
+// function popUp(visible: boolean, index: number) {
+//   const delay = 0.1 + index * 0.13;
+//   return {
+//     opacity: visible ? 1 : 0,
+//     transform: visible
+//       ? "scale(1) translateY(0)"
+//       : "scale(0.85) translateY(48px)",
+//     transition: `opacity 0.55s cubic-bezier(0.34,1.56,0.64,1) ${delay}s, transform 0.55s cubic-bezier(0.34,1.56,0.64,1) ${delay}s`,
+//   };
+// }
 
+// // ── Icons ──────────────────────────────────────────────────
 // const TargetIcon = () => (
 //   <svg
 //     width="24"
@@ -50,7 +96,6 @@
 //     <circle cx="12" cy="12" r="2" />
 //   </svg>
 // );
-
 // const StarIcon = () => (
 //   <svg
 //     width="24"
@@ -65,7 +110,6 @@
 //     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
 //   </svg>
 // );
-
 // const HeartIcon = () => (
 //   <svg
 //     width="22"
@@ -80,7 +124,6 @@
 //     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
 //   </svg>
 // );
-
 // const UsersIcon = () => (
 //   <svg
 //     width="22"
@@ -98,7 +141,6 @@
 //     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
 //   </svg>
 // );
-
 // const BookIcon = () => (
 //   <svg
 //     width="22"
@@ -116,7 +158,6 @@
 //     <line x1="9" y1="11" x2="13" y2="11" />
 //   </svg>
 // );
-
 // const SeedlingIcon = () => (
 //   <svg
 //     width="22"
@@ -133,7 +174,6 @@
 //     <path d="M12 12c0 0 5-1 7-5 1-2 1-5-2-6-2-1-5 0-5 0s0 3 2 5c1 1 2 2 2 4" />
 //   </svg>
 // );
-
 // const CheckIcon = () => (
 //   <svg
 //     width="10"
@@ -148,7 +188,6 @@
 //     <polyline points="20 6 9 17 4 12" />
 //   </svg>
 // );
-
 // const ArrowRightIcon = () => (
 //   <svg
 //     width="15"
@@ -195,25 +234,20 @@
 // ];
 
 // export default function AboutPage() {
-//   const heroRef = useRef<HTMLDivElement>(null);
-//   const storyRef = useRef<HTMLDivElement>(null);
-//   const missionRef = useRef<HTMLDivElement>(null);
-//   const valuesRef = useRef<HTMLDivElement>(null);
-//   const teamRef = useRef<HTMLDivElement>(null);
-
-//   useReveal(heroRef);
-//   useReveal(storyRef);
-//   useReveal(missionRef);
-//   useReveal(valuesRef);
-//   useReveal(teamRef);
+//   const { ref: heroRef, visible: heroVisible } = useScrollReveal(0.1);
+//   const { ref: storyRef, visible: storyVisible } = useScrollReveal(0.1);
+//   const { ref: missionRef, visible: missionVisible } = useScrollReveal(0.1);
+//   const { ref: valuesRef, visible: valuesVisible } = useScrollReveal(0.1);
+//   const { ref: teamRef, visible: teamVisible } = useScrollReveal(0.1);
+//   const { ref: ctaRef, visible: ctaVisible } = useScrollReveal(0.15);
 
 //   return (
 //     <>
 //       <Navbar />
 //       <main className="bg-[#0D1B5E] min-h-screen text-white">
-//         {/* ── HERO ── */}
+//         {/* ── HERO: left-slide stagger ── */}
 //         <section
-//           ref={heroRef}
+//           ref={heroRef as React.RefObject<HTMLElement>}
 //           className="relative overflow-hidden py-32 px-6 text-center"
 //         >
 //           <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#F5C400]" />
@@ -226,8 +260,8 @@
 //           />
 //           <div className="max-w-3xl mx-auto relative">
 //             <div
-//               className="reveal flex items-center justify-center gap-3 mb-6"
-//               style={revealStyle}
+//               className="flex items-center justify-center gap-3 mb-6"
+//               style={slideLeft(heroVisible, 0)}
 //             >
 //               <div className="w-6 h-[2px] bg-[#F5C400]" />
 //               <span
@@ -239,17 +273,20 @@
 //               <div className="w-6 h-[2px] bg-[#F5C400]" />
 //             </div>
 //             <h1
-//               className="reveal text-5xl lg:text-[68px] font-extrabold leading-[1.05] tracking-tight mb-6"
+//               className="text-5xl lg:text-[68px] font-extrabold leading-[1.05] tracking-tight mb-6"
 //               style={{
-//                 ...revealStyle,
+//                 ...slideLeft(heroVisible, 0.1),
 //                 fontFamily: "'Fraunces', Georgia, serif",
 //               }}
 //             >
 //               We Exist for <span className="text-[#F5C400]">Every Child</span>
 //             </h1>
 //             <p
-//               className="reveal text-white/55 text-lg leading-relaxed max-w-xl mx-auto"
-//               style={{ ...revealStyle, fontFamily: "'Barlow', sans-serif" }}
+//               className="text-white/55 text-lg leading-relaxed max-w-xl mx-auto"
+//               style={{
+//                 ...slideLeft(heroVisible, 0.2),
+//                 fontFamily: "'Barlow', sans-serif",
+//               }}
 //             >
 //               Learn about the heart, history, and people behind Precious Pearl
 //               Support Initiative and our mission to nurture every child's
@@ -258,10 +295,14 @@
 //           </div>
 //         </section>
 
-//         {/* ── OUR STORY ── */}
-//         <section ref={storyRef} className="py-24 px-6">
+//         {/* ── OUR STORY: image from left, text from right ── */}
+//         <section
+//           ref={storyRef as React.RefObject<HTMLElement>}
+//           className="py-24 px-6"
+//         >
 //           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-//             <div className="reveal relative" style={revealStyle}>
+//             {/* Image — slides from left */}
+//             <div className="relative" style={slideLeft(storyVisible, 0)}>
 //               <div className="rounded-3xl overflow-hidden aspect-[4/3] relative">
 //                 <Image
 //                   src="/0YHrM.jpg"
@@ -275,10 +316,11 @@
 //               <div className="absolute -top-4 -right-4 w-12 h-12 border border-[#F5C400]/25 rounded-xl -z-10" />
 //             </div>
 
+//             {/* Text — slides from right */}
 //             <div className="space-y-5">
 //               <div
-//                 className="reveal flex items-center gap-3"
-//                 style={revealStyle}
+//                 className="flex items-center gap-3"
+//                 style={slideRight(storyVisible, 0.1)}
 //               >
 //                 <div className="w-5 h-[2px] bg-[#F5C400]" />
 //                 <span
@@ -289,17 +331,20 @@
 //                 </span>
 //               </div>
 //               <h2
-//                 className="reveal text-4xl font-bold leading-[1.15]"
+//                 className="text-4xl font-bold leading-[1.15]"
 //                 style={{
-//                   ...revealStyle,
+//                   ...slideRight(storyVisible, 0.18),
 //                   fontFamily: "'Fraunces', Georgia, serif",
 //                 }}
 //               >
 //                 Born from a Belief That No Child Should Be Left Behind
 //               </h2>
 //               <p
-//                 className="reveal text-white/60 leading-[1.85] text-[15px]"
-//                 style={{ ...revealStyle, fontFamily: "'Barlow', sans-serif" }}
+//                 className="text-white/60 leading-[1.85] text-[15px]"
+//                 style={{
+//                   ...slideRight(storyVisible, 0.25),
+//                   fontFamily: "'Barlow', sans-serif",
+//                 }}
 //               >
 //                 Precious Pearl Support Initiative was founded with a singular
 //                 conviction: that every school-age child deserves more than just
@@ -307,8 +352,11 @@
 //                 and a community that believes in their future.
 //               </p>
 //               <p
-//                 className="reveal text-white/50 leading-[1.85] text-[15px]"
-//                 style={{ ...revealStyle, fontFamily: "'Barlow', sans-serif" }}
+//                 className="text-white/50 leading-[1.85] text-[15px]"
+//                 style={{
+//                   ...slideRight(storyVisible, 0.32),
+//                   fontFamily: "'Barlow', sans-serif",
+//                 }}
 //               >
 //                 What started as a small local effort to distribute school
 //                 supplies has grown into a structured initiative supporting over
@@ -316,7 +364,10 @@
 //                 community outreach — all fueled by passionate volunteers and
 //                 generous donors.
 //               </p>
-//               <div className="reveal space-y-2 pt-2" style={revealStyle}>
+//               <div
+//                 className="space-y-2 pt-2"
+//                 style={slideRight(storyVisible, 0.4)}
+//               >
 //                 {[
 //                   "Founded on community and shared purpose",
 //                   "100% volunteer and donor-driven",
@@ -339,16 +390,16 @@
 //           </div>
 //         </section>
 
-//         {/* ── MISSION & VISION ── */}
+//         {/* ── MISSION & VISION: spring scale-up ── */}
 //         <section
-//           ref={missionRef}
+//           ref={missionRef as React.RefObject<HTMLElement>}
 //           className="py-24 px-6 bg-white/[0.02] border-y border-white/[0.05]"
 //         >
 //           <div className="max-w-6xl mx-auto">
 //             <div className="text-center mb-16">
 //               <div
-//                 className="reveal flex items-center justify-center gap-3 mb-5"
-//                 style={revealStyle}
+//                 className="flex items-center justify-center gap-3 mb-5"
+//                 style={fadeUp(missionVisible, 0)}
 //               >
 //                 <div className="w-5 h-[2px] bg-[#F5C400]" />
 //                 <span
@@ -360,9 +411,9 @@
 //                 <div className="w-5 h-[2px] bg-[#F5C400]" />
 //               </div>
 //               <h2
-//                 className="reveal text-4xl font-bold"
+//                 className="text-4xl font-bold"
 //                 style={{
-//                   ...revealStyle,
+//                   ...fadeUp(missionVisible, 0.1),
 //                   fontFamily: "'Fraunces', Georgia, serif",
 //                 }}
 //               >
@@ -381,12 +432,20 @@
 //                   Icon: StarIcon,
 //                   text: "A world where every child has the tools, support, and belief in themselves to reach their fullest potential — and where communities rally together to make that vision a reality.",
 //                 },
-//               ].map((item) => (
+//               ].map((item, i) => (
 //                 <div
 //                   key={item.label}
-//                   className="reveal group bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-[#F5C400]/35 hover:bg-white/[0.07] transition-all duration-300"
-//                   style={revealStyle}
+//                   className="group bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-[#F5C400]/35 hover:bg-white/[0.07] transition-all duration-300 overflow-hidden relative"
+//                   style={scaleUp(missionVisible, 0.15 + i * 0.12)}
 //                 >
+//                   {/* Shimmer on hover */}
+//                   <div
+//                     className="absolute top-0 left-8 right-8 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+//                     style={{
+//                       background:
+//                         "linear-gradient(90deg, transparent, #F5C400, transparent)",
+//                     }}
+//                   />
 //                   <div className="w-12 h-12 rounded-2xl bg-[#F5C400]/10 border border-[#F5C400]/25 flex items-center justify-center text-[#F5C400] mb-5 group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] group-hover:border-[#F5C400] transition-all duration-300">
 //                     <item.Icon />
 //                   </div>
@@ -408,13 +467,16 @@
 //           </div>
 //         </section>
 
-//         {/* ── CORE VALUES ── */}
-//         <section ref={valuesRef} className="py-24 px-6">
+//         {/* ── CORE VALUES: fan in diagonally ── */}
+//         <section
+//           ref={valuesRef as React.RefObject<HTMLElement>}
+//           className="py-24 px-6"
+//         >
 //           <div className="max-w-6xl mx-auto">
 //             <div className="text-center mb-16">
 //               <div
-//                 className="reveal flex items-center justify-center gap-3 mb-5"
-//                 style={revealStyle}
+//                 className="flex items-center justify-center gap-3 mb-5"
+//                 style={fadeUp(valuesVisible, 0)}
 //               >
 //                 <div className="w-5 h-[2px] bg-[#F5C400]" />
 //                 <span
@@ -426,9 +488,9 @@
 //                 <div className="w-5 h-[2px] bg-[#F5C400]" />
 //               </div>
 //               <h2
-//                 className="reveal text-4xl font-bold"
+//                 className="text-4xl font-bold"
 //                 style={{
-//                   ...revealStyle,
+//                   ...fadeUp(valuesVisible, 0.1),
 //                   fontFamily: "'Fraunces', Georgia, serif",
 //                 }}
 //               >
@@ -439,8 +501,8 @@
 //               {values.map((v, i) => (
 //                 <div
 //                   key={v.value}
-//                   className="reveal group bg-white/[0.04] border border-white/10 rounded-3xl p-7 hover:bg-white/[0.08] hover:border-[#F5C400]/30 transition-all duration-300"
-//                   style={revealStyle}
+//                   className="group bg-white/[0.04] border border-white/10 rounded-3xl p-7 hover:bg-white/[0.08] hover:border-[#F5C400]/30 transition-all duration-300"
+//                   style={fanIn(valuesVisible, i)}
 //                 >
 //                   <div className="flex items-start justify-between mb-5">
 //                     <div className="w-12 h-12 rounded-2xl bg-[#F5C400]/10 border border-[#F5C400]/20 flex items-center justify-center text-[#F5C400] group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] group-hover:border-[#F5C400] transition-all duration-300">
@@ -471,16 +533,16 @@
 //           </div>
 //         </section>
 
-//         {/* ── TEAM ── */}
+//         {/* ── TEAM: polaroid pop-up ── */}
 //         <section
-//           ref={teamRef}
+//           ref={teamRef as React.RefObject<HTMLElement>}
 //           className="py-24 px-6 bg-white/[0.02] border-y border-white/[0.05]"
 //         >
 //           <div className="max-w-6xl mx-auto">
 //             <div className="text-center mb-16">
 //               <div
-//                 className="reveal flex items-center justify-center gap-3 mb-5"
-//                 style={revealStyle}
+//                 className="flex items-center justify-center gap-3 mb-5"
+//                 style={fadeUp(teamVisible, 0)}
 //               >
 //                 <div className="w-5 h-[2px] bg-[#F5C400]" />
 //                 <span
@@ -492,9 +554,9 @@
 //                 <div className="w-5 h-[2px] bg-[#F5C400]" />
 //               </div>
 //               <h2
-//                 className="reveal text-4xl font-bold"
+//                 className="text-4xl font-bold"
 //                 style={{
-//                   ...revealStyle,
+//                   ...fadeUp(teamVisible, 0.1),
 //                   fontFamily: "'Fraunces', Georgia, serif",
 //                 }}
 //               >
@@ -505,8 +567,8 @@
 //               {team.map((member, i) => (
 //                 <div
 //                   key={i}
-//                   className="reveal group bg-white/[0.04] border border-white/10 rounded-3xl p-7 text-center hover:border-[#F5C400]/30 hover:bg-white/[0.07] transition-all duration-300"
-//                   style={revealStyle}
+//                   className="group bg-white/[0.04] border border-white/10 rounded-3xl p-7 text-center hover:border-[#F5C400]/30 hover:bg-white/[0.07] transition-all duration-300"
+//                   style={popUp(teamVisible, i)}
 //                 >
 //                   <div className="w-20 h-20 rounded-full bg-[#F5C400]/10 border-2 border-[#F5C400]/30 mx-auto mb-5 flex items-center justify-center text-[#F5C400] group-hover:bg-[#F5C400]/20 transition-colors duration-300">
 //                     <svg
@@ -548,8 +610,11 @@
 //           </div>
 //         </section>
 
-//         {/* ── CTA BANNER ── */}
-//         <section className="py-24 px-6 relative overflow-hidden">
+//         {/* ── CTA BANNER: clean fade-up from center ── */}
+//         <section
+//           ref={ctaRef as React.RefObject<HTMLElement>}
+//           className="py-24 px-6 relative overflow-hidden"
+//         >
 //           <div
 //             className="absolute inset-0 pointer-events-none"
 //             style={{
@@ -560,19 +625,28 @@
 //           <div className="max-w-2xl mx-auto text-center relative">
 //             <h2
 //               className="text-4xl lg:text-5xl font-bold mb-4 leading-tight"
-//               style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+//               style={{
+//                 ...fadeUp(ctaVisible, 0),
+//                 fontFamily: "'Fraunces', Georgia, serif",
+//               }}
 //             >
 //               Ready to Make a{" "}
 //               <span className="text-[#F5C400]">Difference?</span>
 //             </h2>
 //             <p
 //               className="text-white/55 mb-10 leading-relaxed text-[15px]"
-//               style={{ fontFamily: "'Barlow', sans-serif" }}
+//               style={{
+//                 ...fadeUp(ctaVisible, 0.12),
+//                 fontFamily: "'Barlow', sans-serif",
+//               }}
 //             >
 //               Join thousands of supporters helping us transform children's
 //               futures one resource, one smile, one life at a time.
 //             </p>
-//             <div className="flex flex-col sm:flex-row gap-3 justify-center">
+//             <div
+//               className="flex flex-col sm:flex-row gap-3 justify-center"
+//               style={fadeUp(ctaVisible, 0.22)}
+//             >
 //               <Link
 //                 href="/donate"
 //                 className="inline-flex items-center justify-center gap-2 bg-[#F5C400] text-[#0D1B5E] font-bold px-8 py-[14px] rounded-full text-[12px] tracking-[0.12em] uppercase hover:bg-[#e6b800] transition-colors duration-200 group"
@@ -831,12 +905,6 @@ const values = [
   },
 ];
 
-const team = [
-  { name: "Team Member", role: "Founder & Executive Director" },
-  { name: "Team Member", role: "Programs Coordinator" },
-  { name: "Team Member", role: "Community Outreach Lead" },
-];
-
 export default function AboutPage() {
   const { ref: heroRef, visible: heroVisible } = useScrollReveal(0.1);
   const { ref: storyRef, visible: storyVisible } = useScrollReveal(0.1);
@@ -849,7 +917,7 @@ export default function AboutPage() {
     <>
       <Navbar />
       <main className="bg-[#0D1B5E] min-h-screen text-white">
-        {/* ── HERO: left-slide stagger ── */}
+        {/* ── HERO ── */}
         <section
           ref={heroRef as React.RefObject<HTMLElement>}
           className="relative overflow-hidden py-32 px-6 text-center"
@@ -893,34 +961,28 @@ export default function AboutPage() {
               }}
             >
               Learn about the heart, history, and people behind Precious Pearl
-              Support Initiative and our mission to nurture every child's
-              potential.
+              Support Initiative.
             </p>
           </div>
         </section>
 
-        {/* ── OUR STORY: image from left, text from right ── */}
+        {/* ── OUR STORY ── */}
         <section
           ref={storyRef as React.RefObject<HTMLElement>}
           className="py-24 px-6"
         >
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Image — slides from left */}
             <div className="relative" style={slideLeft(storyVisible, 0)}>
               <div className="rounded-3xl overflow-hidden aspect-[4/3] relative">
                 <Image
                   src="/0YHrM.jpg"
-                  alt="Precious Pearl Support Initiative"
+                  alt="Precious Pearl"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
-              <div className="absolute -bottom-4 -left-4 w-20 h-20 border-2 border-[#F5C400]/50 rounded-2xl -z-10" />
-              <div className="absolute -top-4 -right-4 w-12 h-12 border border-[#F5C400]/25 rounded-xl -z-10" />
             </div>
-
-            {/* Text — slides from right */}
             <div className="space-y-5">
               <div
                 className="flex items-center gap-3"
@@ -950,23 +1012,9 @@ export default function AboutPage() {
                   fontFamily: "'Barlow', sans-serif",
                 }}
               >
-                Precious Pearl Support Initiative was founded with a singular
-                conviction: that every school-age child deserves more than just
-                a seat in a classroom. They deserve resources, encouragement,
+                Precious Pearl Support Initiative was founded with a conviction
+                that every school-age child deserves resources, encouragement,
                 and a community that believes in their future.
-              </p>
-              <p
-                className="text-white/50 leading-[1.85] text-[15px]"
-                style={{
-                  ...slideRight(storyVisible, 0.32),
-                  fontFamily: "'Barlow', sans-serif",
-                }}
-              >
-                What started as a small local effort to distribute school
-                supplies has grown into a structured initiative supporting over
-                500 children through education programs, mentorship, and
-                community outreach — all fueled by passionate volunteers and
-                generous donors.
               </p>
               <div
                 className="space-y-2 pt-2"
@@ -994,7 +1042,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── MISSION & VISION: spring scale-up ── */}
+        {/* ── MISSION & VISION ── */}
         <section
           ref={missionRef as React.RefObject<HTMLElement>}
           className="py-24 px-6 bg-white/[0.02] border-y border-white/[0.05]"
@@ -1021,7 +1069,7 @@ export default function AboutPage() {
                   fontFamily: "'Fraunces', Georgia, serif",
                 }}
               >
-                Mission &amp; Vision
+                Mission & Vision
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1029,28 +1077,20 @@ export default function AboutPage() {
                 {
                   label: "Our Mission",
                   Icon: TargetIcon,
-                  text: "To empower school-aged children by providing access to quality education, essential resources, and opportunities that enable them to grow, learn, and thrive — regardless of their socioeconomic background.",
+                  text: "To empower school-aged children by providing access to quality education and essential resources.",
                 },
                 {
                   label: "Our Vision",
                   Icon: StarIcon,
-                  text: "A world where every child has the tools, support, and belief in themselves to reach their fullest potential — and where communities rally together to make that vision a reality.",
+                  text: "A world where every child has the tools and support to reach their fullest potential.",
                 },
               ].map((item, i) => (
                 <div
                   key={item.label}
-                  className="group bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-[#F5C400]/35 hover:bg-white/[0.07] transition-all duration-300 overflow-hidden relative"
+                  className="group bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-[#F5C400]/35 hover:bg-white/[0.07] transition-all duration-300 relative"
                   style={scaleUp(missionVisible, 0.15 + i * 0.12)}
                 >
-                  {/* Shimmer on hover */}
-                  <div
-                    className="absolute top-0 left-8 right-8 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, transparent, #F5C400, transparent)",
-                    }}
-                  />
-                  <div className="w-12 h-12 rounded-2xl bg-[#F5C400]/10 border border-[#F5C400]/25 flex items-center justify-center text-[#F5C400] mb-5 group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] group-hover:border-[#F5C400] transition-all duration-300">
+                  <div className="w-12 h-12 rounded-2xl bg-[#F5C400]/10 border border-[#F5C400]/25 flex items-center justify-center text-[#F5C400] mb-5 group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] transition-all duration-300">
                     <item.Icon />
                   </div>
                   <h3
@@ -1071,7 +1111,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── CORE VALUES: fan in diagonally ── */}
+        {/* ── CORE VALUES ── */}
         <section
           ref={valuesRef as React.RefObject<HTMLElement>}
           className="py-24 px-6"
@@ -1108,19 +1148,11 @@ export default function AboutPage() {
                   className="group bg-white/[0.04] border border-white/10 rounded-3xl p-7 hover:bg-white/[0.08] hover:border-[#F5C400]/30 transition-all duration-300"
                   style={fanIn(valuesVisible, i)}
                 >
-                  <div className="flex items-start justify-between mb-5">
-                    <div className="w-12 h-12 rounded-2xl bg-[#F5C400]/10 border border-[#F5C400]/20 flex items-center justify-center text-[#F5C400] group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] group-hover:border-[#F5C400] transition-all duration-300">
-                      {v.icon}
-                    </div>
-                    <span
-                      className="text-white/15 text-[28px] font-bold leading-none"
-                      style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-                    >
-                      0{i + 1}
-                    </span>
+                  <div className="w-12 h-12 rounded-2xl bg-[#F5C400]/10 border border-[#F5C400]/20 flex items-center justify-center text-[#F5C400] mb-5 group-hover:bg-[#F5C400] group-hover:text-[#0D1B5E] transition-all duration-300">
+                    {v.icon}
                   </div>
                   <h4
-                    className="text-white font-bold text-[17px] mb-2 group-hover:text-[#F5C400] transition-colors duration-300"
+                    className="text-white font-bold text-[17px] mb-2"
                     style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                   >
                     {v.value}
@@ -1137,7 +1169,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── TEAM: polaroid pop-up ── */}
+        {/* ── UPDATED TEAM SECTION: MEET THE FOUNDER ALONE ── */}
         <section
           ref={teamRef as React.RefObject<HTMLElement>}
           className="py-24 px-6 bg-white/[0.02] border-y border-white/[0.05]"
@@ -1153,7 +1185,7 @@ export default function AboutPage() {
                   className="text-[#F5C400] text-[10px] font-bold tracking-[0.3em] uppercase"
                   style={{ fontFamily: "'Barlow', sans-serif" }}
                 >
-                  The People Behind PPSI
+                  Visionary Leadership
                 </span>
                 <div className="w-5 h-[2px] bg-[#F5C400]" />
               </div>
@@ -1164,57 +1196,67 @@ export default function AboutPage() {
                   fontFamily: "'Fraunces', Georgia, serif",
                 }}
               >
-                Meet Our Team
+                Meet Our Founder
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {team.map((member, i) => (
-                <div
-                  key={i}
-                  className="group bg-white/[0.04] border border-white/10 rounded-3xl p-7 text-center hover:border-[#F5C400]/30 hover:bg-white/[0.07] transition-all duration-300"
-                  style={popUp(teamVisible, i)}
-                >
-                  <div className="w-20 h-20 rounded-full bg-[#F5C400]/10 border-2 border-[#F5C400]/30 mx-auto mb-5 flex items-center justify-center text-[#F5C400] group-hover:bg-[#F5C400]/20 transition-colors duration-300">
-                    <svg
-                      width="32"
-                      height="32"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
+
+            {/* Single Founder Profile */}
+            <div className="max-w-4xl mx-auto">
+              <div
+                className="group bg-white/[0.04] border border-white/10 rounded-[40px] p-8 md:p-12 flex flex-col md:flex-row items-center gap-10 hover:border-[#F5C400]/30 hover:bg-white/[0.07] transition-all duration-500"
+                style={popUp(teamVisible, 0)}
+              >
+                {/* Founder Image Wrapper */}
+                <div className="relative w-64 h-64 md:w-80 md:h-80 flex-shrink-0">
+                  <div className="absolute inset-0 rounded-[32px] border-2 border-[#F5C400]/20 rotate-6 group-hover:rotate-12 transition-transform duration-500" />
+                  <div className="relative w-full h-full rounded-[32px] overflow-hidden border-2 border-[#F5C400]/40">
+                    <Image
+                      src="/WhatsApp Image 2026-04-15 at 06.24.45.jpeg"
+                      alt="Olayemi Cynthia Akindele"
+                      fill
+                      className="object-cover object-top group-hover:scale-110 transition-transform duration-700"
+                    />
                   </div>
+                </div>
+
+                {/* Founder Details */}
+                <div className="flex-1 text-center md:text-left">
                   <h4
-                    className="text-white font-bold text-lg"
+                    className="text-3xl font-bold text-white mb-2"
                     style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                   >
-                    {member.name}
+                    Olayemi Cynthia Akindele
                   </h4>
                   <p
-                    className="text-[#F5C400] text-[13px] mt-1 font-medium"
+                    className="text-[#F5C400] text-lg font-semibold mb-6 tracking-wide"
                     style={{ fontFamily: "'Barlow', sans-serif" }}
                   >
-                    {member.role}
+                    DNP, APRN, MSN, RN, FNP-C, PMHNP-BC
                   </p>
-                  <div className="w-8 h-[1px] bg-white/10 mx-auto mt-4 mb-4" />
                   <p
-                    className="text-white/25 text-[11.5px] italic"
+                    className="text-white/60 leading-relaxed text-base italic"
                     style={{ fontFamily: "'Barlow', sans-serif" }}
                   >
-                    Replace with real team data
+                    &quot;I am a dual certified Psychiatric Mental Health Nurse
+                    Practitioner and Family Nurse Practitioner with over 10
+                    years of experience in mental health. My mission is to
+                    ensure that no child’s potential is limited by their health
+                    or circumstances.&quot;
+                  </p>
+                  <div className="w-16 h-[2px] bg-[#F5C400]/30 mt-8 mb-4 mx-auto md:mx-0" />
+                  <p
+                    className="text-white/30 text-xs tracking-widest uppercase font-bold"
+                    style={{ fontFamily: "'Barlow', sans-serif" }}
+                  >
+                    Founder &amp; Executive Director
                   </p>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── CTA BANNER: clean fade-up from center ── */}
+        {/* ── CTA BANNER ── */}
         <section
           ref={ctaRef as React.RefObject<HTMLElement>}
           className="py-24 px-6 relative overflow-hidden"
@@ -1228,7 +1270,7 @@ export default function AboutPage() {
           />
           <div className="max-w-2xl mx-auto text-center relative">
             <h2
-              className="text-4xl lg:text-5xl font-bold mb-4 leading-tight"
+              className="text-4xl lg:text-5xl font-bold mb-4"
               style={{
                 ...fadeUp(ctaVisible, 0),
                 fontFamily: "'Fraunces', Georgia, serif",
@@ -1238,14 +1280,13 @@ export default function AboutPage() {
               <span className="text-[#F5C400]">Difference?</span>
             </h2>
             <p
-              className="text-white/55 mb-10 leading-relaxed text-[15px]"
+              className="text-white/55 mb-10 leading-relaxed"
               style={{
                 ...fadeUp(ctaVisible, 0.12),
                 fontFamily: "'Barlow', sans-serif",
               }}
             >
-              Join thousands of supporters helping us transform children's
-              futures one resource, one smile, one life at a time.
+              Join us in transforming children's futures one resource at a time.
             </p>
             <div
               className="flex flex-col sm:flex-row gap-3 justify-center"
@@ -1253,23 +1294,15 @@ export default function AboutPage() {
             >
               <Link
                 href="/donate"
-                className="inline-flex items-center justify-center gap-2 bg-[#F5C400] text-[#0D1B5E] font-bold px-8 py-[14px] rounded-full text-[12px] tracking-[0.12em] uppercase hover:bg-[#e6b800] transition-colors duration-200 group"
-                style={{ fontFamily: "'Barlow', sans-serif" }}
+                className="bg-[#F5C400] text-[#0D1B5E] font-bold px-8 py-4 rounded-full text-[12px] tracking-[0.12em] uppercase hover:bg-[#e6b800] transition-all"
               >
                 Donate Now
-                <span className="group-hover:translate-x-1 transition-transform duration-200">
-                  <ArrowRightIcon />
-                </span>
               </Link>
               <Link
                 href="/#contact"
-                className="inline-flex items-center justify-center gap-2 border border-white/20 text-white font-bold px-8 py-[14px] rounded-full text-[12px] tracking-[0.12em] uppercase hover:border-[#F5C400]/60 hover:text-[#F5C400] transition-all duration-200 group"
-                style={{ fontFamily: "'Barlow', sans-serif" }}
+                className="border border-white/20 text-white font-bold px-8 py-4 rounded-full text-[12px] tracking-[0.12em] uppercase hover:border-[#F5C400]/60 transition-all"
               >
                 Get in Touch
-                <span className="group-hover:translate-x-1 transition-transform duration-200">
-                  <ArrowRightIcon />
-                </span>
               </Link>
             </div>
           </div>

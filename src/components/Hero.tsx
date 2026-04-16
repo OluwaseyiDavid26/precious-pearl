@@ -156,8 +156,8 @@ export default function Hero() {
   }, []);
 
   const stats = [
-    { num: "500", sup: "+", label: "Children Supported" },
-    { num: "1K", sup: "+", label: "Supplies Distributed" },
+    { num: "2000", sup: "+", label: "Children Supported" },
+    { num: "5K", sup: "+", label: "Supplies Distributed" },
     { num: "4", sup: "+", label: "Active Programs" },
   ];
 
