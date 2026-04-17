@@ -352,7 +352,7 @@ const MapPinIcon = () => (
 
 const stats = [
   {
-    value: 500,
+    value: 2000,
     suffix: "+",
     label: "Children Supported",
     description:
@@ -360,7 +360,7 @@ const stats = [
     Icon: UsersIcon,
   },
   {
-    value: 1000,
+    value: 5000,
     suffix: "+",
     label: "Supplies Distributed",
     description:

@@ -1225,7 +1225,7 @@ export default function AboutPage() {
                     className="text-3xl font-bold text-white mb-2"
                     style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                   >
-                    Olayemi Cynthia Akindele
+                    DR. Olayemi Cynthia Akindele
                   </h4>
                   <p
                     className="text-[#F5C400] text-lg font-semibold mb-6 tracking-wide"

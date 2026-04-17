@@ -58,9 +58,9 @@ export const metadata: Metadata = {
   description:
     "Empowering Children. Transforming Futures. | Education NGO in Akure, Ondo State",
   icons: {
-    icon: "/o61dh-removebg-preview.png",
-    shortcut: "/o61dh-removebg-preview.png",
-    apple: "/o61dh-removebg-preview.png",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
